@@ -1,0 +1,31 @@
+name: Build and Push Flutter Starter Kit
+
+on:
+  workflow_dispatch: # بيخليك تدوس زرار "تشغيل" وقت ما تحب
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Create Flutter Project (Android & iOS only)
+        run: |
+          flutter create --org com.starter.kit --platforms=android,ios .
+          rm -rf web windows linux macos
+          flutter pub add go_router flutter_riverpod shared_preferences
+          mkdir -p lib/app lib/core/constants lib/core/localization lib/core/network lib/core/router lib/core/storage lib/core/theme lib/features/home/data lib/features/home/domain lib/features/home/presentation
+
+      - name: Commit and Push to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "feat: auto-build flutter starter kit via GitHub Actions"
+          git push
