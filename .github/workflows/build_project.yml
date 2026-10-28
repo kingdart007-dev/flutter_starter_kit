@@ -1,7 +1,7 @@
 name: Build and Push Flutter Starter Kit
 
 on:
-  workflow_dispatch: # بيخليك تدوس زرار "تشغيل" وقت ما تحب
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,17 +15,33 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create Flutter Project (Android & iOS only)
+      - name: Setup Core Structure and Localization Setup
         run: |
-          flutter create --org com.starter.kit --platforms=android,ios .
-          rm -rf web windows linux macos
-          flutter pub add go_router flutter_riverpod shared_preferences
-          mkdir -p lib/app lib/core/constants lib/core/localization lib/core/network lib/core/router lib/core/storage lib/core/theme lib/features/home/data lib/features/home/domain lib/features/home/presentation
+          # إنشاء ملف إعدادات الثيم والتفضيلات يدوياً
+          mkdir -p lib/core/theme lib/core/localization lib/core/storage
 
-      - name: Commit and Push to Repository
-        run: |
+          # كتابة ملف الثيم الأساسي (Light & Dark)
+          cat << 'EOF' > lib/core/theme/app_theme.dart
+          import 'package:flutter/material.dart';
+
+          class AppTheme {
+            static final ThemeData lightTheme = ThemeData(
+              brightness: Brightness.light,
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
+            );
+
+            static final ThemeData darkTheme = ThemeData(
+              brightness: Brightness.dark,
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark),
+            );
+          }
+          EOF
+
+          # رفع التحديثات الجديدة للمستودع
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "feat: auto-build flutter starter kit via GitHub Actions"
+          git commit -m "feat: add core theme architecture and setup"
           git push
